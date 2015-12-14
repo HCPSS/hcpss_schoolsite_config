@@ -1,0 +1,12 @@
+<?php
+
+// Add github syntax highlighting
+// vim: set filetype=php:
+// -*- mode: php;-*-
+
+/**
+ * Implementation of hook_install
+ */
+function hcpss_schoolsite_config_install() {
+  _hcpss_schoolsite_config_set_default_config();
+}
