@@ -6,9 +6,9 @@
 
 /**
  * Implementation of hook_form_FORM_ID_alter
- * 
+ *
  * Add our configuration to the site information form.
- * 
+ *
  * @param array $form
  * @param array $form_state
  * @param string $form_id
@@ -18,27 +18,38 @@ function hcpss_schoolsite_config_form_system_site_information_settings_alter(&$f
     '#type'   => 'fieldset',
     '#title'  => 'HCPSS Schools Site Configuration',
   );
-  
+
   // Add the school code field
   $form['hcpss_schoolsite_config']['hcpss_school_code'] = array(
     '#type'           => 'textfield',
     '#title'          => 'School Code',
+    '#description'    => t('The school abbreviation used for subdomain and other naming access.'),
     '#default_value'  => variable_get('hcpss_school_code'),
     '#required'       => TRUE,
   );
-  
+
   // Add the facebook URL field
   $form['hcpss_schoolsite_config']['hcpss_school_facebook_url'] = array(
     '#type'             => 'textfield',
     '#title'            => 'Facebook URL',
+    '#description'      => t("The full URL of the school's Facebook page."),
     '#default_value'    => variable_get('hcpss_school_facebook_url'),
+    '#element_validate' => array('_hcpss_schoolsite_config_validate_url'),
+  );
+
+  // Add the blog URL field
+  $form['hcpss_schoolsite_config']['hcpss_school_blog_url'] = array(
+    '#type'             => 'textfield',
+    '#title'            => 'Blog URL',
+    '#description'      => t("The full URL of the school's blog"),
+    '#default_value'    => variable_get('hcpss_school_blog_url'),
     '#element_validate' => array('_hcpss_schoolsite_config_validate_url'),
   );
 }
 
 /**
  * Element validate callback to validate that an element is a valid URL.
- * 
+ *
  * @param array $element
  * @param array $form_state
  * @param array $form
@@ -62,17 +73,17 @@ function _hcpss_schoolsite_config_set_default_config() {
 
 /**
  * Guess the school code from the name of the database
- * 
+ *
  * @global array $databases
  * @return string
  */
 function _hcpss_schoolsite_config_guess_school_code() {
   global $databases;
-  
+
   // If the database name is "site_hs_rhhs" then the code is "rhhs"
   $db_name        = $databases['default']['default']['database'];
   $db_name_array  = explode('_', $db_name);
   $code           = array_pop($db_name_array);
-  
+
   return $code;
 }
