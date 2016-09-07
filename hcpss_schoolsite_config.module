@@ -1,89 +1,73 @@
 <?php
 
-// Add github syntax highlighting
-// vim: set filetype=php:
-// -*- mode: php;-*-
+use Drupal\Core\Form\FormStateInterface;
+use Drupal\Component\Utility\UrlHelper;
 
 /**
- * Implementation of hook_form_FORM_ID_alter
- *
- * Add our configuration to the site information form.
+ * Implementation of hook_form_FORM_ID_alter().
+ */
+function hcpss_schoolsite_config_form_system_site_information_settings_alter(
+  &$form, FormStateInterface $form_state, $form_id) {
+
+  $config = \Drupal::config('hcpss_schoolsite_config.settings');
+
+  $form['hcpss_schoolsite_config_settings'] = [
+    '#type' => 'details',
+    '#title' => 'Schoolsite configuration',
+    '#open' => true,
+  ];
+
+  $form['hcpss_schoolsite_config_settings']['hcpss_schoolsite_config_code'] = [
+    '#type' => 'textfield',
+    '#title' => 'School code',
+    '#default_value' => $config->get('code'),
+  ];
+
+  $form['hcpss_schoolsite_config_settings']['hcpss_schoolsite_config_facebook'] = [
+    '#type' => 'textfield',
+    '#title' => 'Facebook URL',
+    '#default_value' => $config->get('facebook'),
+  ];
+
+  $form['hcpss_schoolsite_config_settings']['hcpss_schoolsite_config_blog'] = [
+    '#type' => 'textfield',
+    '#title' => 'Blog URL',
+    '#default_value' => $config->get('blog'),
+  ];
+
+  $form['#validate'][] = 'hcpss_schoolsite_config_setting_validate';
+  $form['#submit'][] = 'hcpss_schoolsite_config_setting_submit';
+}
+
+/**
+ * Sumbission handler for system_site_information_settings.
  *
  * @param array $form
- * @param array $form_state
- * @param string $form_id
+ * @param FormStateInterface $form_state
  */
-function hcpss_schoolsite_config_form_system_site_information_settings_alter(&$form, &$form_state, $form_id) {
-  $form['hcpss_schoolsite_config'] = array(
-    '#type'   => 'fieldset',
-    '#title'  => 'HCPSS Schools Site Configuration',
-  );
-
-  // Add the school code field
-  $form['hcpss_schoolsite_config']['hcpss_school_code'] = array(
-    '#type'           => 'textfield',
-    '#title'          => 'School Code',
-    '#description'    => t('The school abbreviation used for subdomain and other naming access.'),
-    '#default_value'  => variable_get('hcpss_school_code'),
-    '#required'       => TRUE,
-  );
-
-  // Add the facebook URL field
-  $form['hcpss_schoolsite_config']['hcpss_school_facebook_url'] = array(
-    '#type'             => 'textfield',
-    '#title'            => 'Facebook URL',
-    '#description'      => t("The full URL of the school's Facebook page."),
-    '#default_value'    => variable_get('hcpss_school_facebook_url'),
-    '#element_validate' => array('_hcpss_schoolsite_config_validate_url'),
-  );
-
-  // Add the blog URL field
-  $form['hcpss_schoolsite_config']['hcpss_school_blog_url'] = array(
-    '#type'             => 'textfield',
-    '#title'            => 'Blog URL',
-    '#description'      => t("The full URL of the school's blog"),
-    '#default_value'    => variable_get('hcpss_school_blog_url'),
-    '#element_validate' => array('_hcpss_schoolsite_config_validate_url'),
-  );
+function hcpss_schoolsite_config_setting_submit(array &$form, FormStateInterface $form_state) {
+  \Drupal::configFactory()->getEditable('hcpss_schoolsite_config.settings')
+    ->set('code', $form_state->getValue('hcpss_schoolsite_config_code'))
+    ->set('facebook', $form_state->getValue('hcpss_schoolsite_config_facebook'))
+    ->set('blog', $form_state->getValue('hcpss_schoolsite_config_blog'))
+    ->save();
 }
 
 /**
- * Element validate callback to validate that an element is a valid URL.
+ * Validation callback for system_site_information_settings.
  *
- * @param array $element
- * @param array $form_state
  * @param array $form
+ * @param FormStateInterface $form_state
  */
-function _hcpss_schoolsite_config_validate_url($element, &$form_state, $form) {
-  if (!empty($element['#value']) && !valid_url($element['#value'], TRUE)) {
-    form_error($element, t('Please enter a valid URL.'));
+function hcpss_schoolsite_config_setting_validate(array &$form, FormStateInterface $form_state) {
+  $facebook = $form_state->getValue('hcpss_schoolsite_config_facebook');
+  $blog     = $form_state->getValue('hcpss_schoolsite_config_blog');
+
+  if ($facebook && !UrlHelper::isValid($facebook, TRUE)) {
+    $form_state->setErrorByName('hcpss_schoolsite_config_facebook', 'Facebook URL must be a valid URL.');
   }
-}
 
-/**
- * Set the site configuration to it's default(s)
- */
-function _hcpss_schoolsite_config_set_default_config() {
-  // School code
-  if (!$code = variable_get('hcpss_school_code')) {
-    $code = _hcpss_schoolsite_config_guess_school_code();
-    variable_set('hcpss_school_code', $code);
+  if ($blog && !UrlHelper::isValid($blog, TRUE)) {
+    $form_state->setErrorByName('hcpss_schoolsite_config_blog', 'Blog URL must be a valid URL.');
   }
-}
-
-/**
- * Guess the school code from the name of the database
- *
- * @global array $databases
- * @return string
- */
-function _hcpss_schoolsite_config_guess_school_code() {
-  global $databases;
-
-  // If the database name is "site_hs_rhhs" then the code is "rhhs"
-  $db_name        = $databases['default']['default']['database'];
-  $db_name_array  = explode('_', $db_name);
-  $code           = array_pop($db_name_array);
-
-  return $code;
 }
