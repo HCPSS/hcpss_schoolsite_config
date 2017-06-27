@@ -14,3 +14,5 @@ for Twitter profiles and site search collections.
 Facebook page.
 
 **Blog URL** - The value should include the full URL of the school's blog.
+
+**Google Analytics Property ID** - The Google Analytics Property ID for the schoool site.
