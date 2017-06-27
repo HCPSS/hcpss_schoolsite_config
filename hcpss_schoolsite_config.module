@@ -45,6 +45,14 @@ function hcpss_schoolsite_config_form_system_site_information_settings_alter(&$f
     '#default_value'    => variable_get('hcpss_school_blog_url'),
     '#element_validate' => array('_hcpss_schoolsite_config_validate_url'),
   );
+
+  // Add the school code field
+  $form['hcpss_schoolsite_config']['hcpss_school_analytics_id'] = array(
+    '#type'           => 'textfield',
+    '#title'          => 'Google Analytics Property ID',
+    '#description'    => t('The Google Analytics Property ID for this schoool site.'),
+    '#default_value'  => variable_get('hcpss_school_analytics_id'),
+  );
 }
 
 /**
