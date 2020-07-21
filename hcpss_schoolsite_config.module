@@ -46,6 +46,15 @@ function hcpss_schoolsite_config_form_system_site_information_settings_alter(&$f
     '#element_validate' => array('_hcpss_schoolsite_config_validate_url'),
   );
 
+  // Add the instagram URL field
+  $form['hcpss_schoolsite_config']['hcpss_school_instagram_url'] = array(
+    '#type'             => 'textfield',
+    '#title'            => 'Instagram URL',
+    '#description'      => t("The full URL of the school's instagram"),
+    '#default_value'    => variable_get('hcpss_school_instagram_url'),
+    '#element_validate' => array('_hcpss_schoolsite_config_validate_url'),
+  );
+
   // Add the school code field
   $form['hcpss_schoolsite_config']['hcpss_school_analytics_id'] = array(
     '#type'           => 'textfield',
